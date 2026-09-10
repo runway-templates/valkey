@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/runway-templates/schema/refs/heads/main/v1alpha1.json
+apiVersion: schema.runway.horse/templates/v1alpha1
+kind: Template
+
+metadata:
+  name: valkey
+  version: 1.0.0
+  displayName: Valkey
+  description: |
+    In-memory key-value store. Open-source fork of Redis, maintained by the
+    Linux Foundation, and wire-compatible with Redis clients. Single instance
+    with AOF persistence on a volume. Not reachable from the internet.
+  category: cache
+  tags: [valkey, redis, cache, kv, queue, pubsub, oss]
+  logo: ./logo.svg
+  documentation: https://valkey.io/topics/
+  website: https://valkey.io
+  source: https://github.com/valkey-io/valkey
+  license: BSD-3-Clause
+  maintainer: runway
+
+inputs:
+  image_tag:
+    type: string
+    default: "9.1.2-alpine"
+    enum:
+      - "9.1.2-alpine"
+      - "9.1.2-trixie"
+      - "8.1.10-alpine"
+      - "8.1.10-trixie"
+    description: |
+      Valkey version. 9.1 is current stable, 8.1 is the previous line. The AOF
+      format is forward-compatible, so upgrades need no dump.
+
+  maxmemory_policy:
+    type: string
+    default: noeviction
+    enum:
+      - noeviction
+      - allkeys-lru
+      - allkeys-lfu
+      - allkeys-random
+      - volatile-lru
+      - volatile-lfu
+      - volatile-random
+      - volatile-ttl
+    description: |
+      What Valkey does when it hits the memory limit. 'noeviction' rejects
+      writes — pick it when you use Valkey as a queue or a datastore.
+      'allkeys-lru' drops the least recently used key — pick it for a cache.
+
+  appendfsync:
+    type: string
+    default: everysec
+    enum: [everysec, always, "no"]
+    description: |
+      How often the AOF is flushed to disk. 'everysec' loses at most one
+      second on a crash. 'always' loses nothing but is much slower.
+
+services:
+  - name: valkey
+    image: "r.planetary-quantum.com/docker-hub-proxy/valkey/valkey:${{ inputs.image_tag }}"
+
+    # No maxmemory: the plan's RAM is the limit.
+    command:
+      - valkey-server
+      - --requirepass
+      - "${{ env.VALKEY_PASSWORD }}"
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - "${{ inputs.appendfsync }}"
+      - --maxmemory-policy
+      - "${{ inputs.maxmemory_policy }}"
+      - --dir
+      - /data
+
+    env:
+      PORT: "6379"
+      VALKEY_PASSWORD:
+        value: "${{ runway.secret(32) }}"
+        description: AUTH password. Connect with it as the default user.
+        warning: |
+          Every client uses this password. Changing it here restarts Valkey
+          with the new one and locks out any client still holding the old
+          value.
+
+    volume:
+      mountPath: /data
+
+    healthcheck:
+      type: tcp
+      initialDelaySeconds: 10
+      periodSeconds: 10
+
+    settings:
+      # No TLS on this listener; AUTH is the only gate.
+      route: false
+
+    minPlan: free-launch
