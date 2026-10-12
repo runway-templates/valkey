@@ -62,7 +62,7 @@ services:
     image: "r.planetary-quantum.com/docker-hub-proxy/valkey/valkey:${{ inputs.image_tag }}"
 
     # No maxmemory: the plan's RAM is the limit.
-    command:
+    args:
       - valkey-server
       - --requirepass
       - "${{ env.VALKEY_PASSWORD }}"
@@ -88,6 +88,11 @@ services:
     volume:
       mountPath: /data
 
+    # the image starts as root and drops to valkey in its entrypoint
+    runAs:
+      user: 999
+      group: 1000
+
     healthcheck:
       type: tcp
       initialDelaySeconds: 10
@@ -96,5 +101,7 @@ services:
     settings:
       # No TLS on this listener; AUTH is the only gate.
       route: false
+      # Valkey only writes to the volume.
+      lockdown: true
 
     minPlan: free-launch
