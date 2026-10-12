@@ -4,7 +4,7 @@ kind: Template
 
 metadata:
   name: valkey
-  version: 1.0.0
+  version: 0.1.1
   displayName: Valkey
   description: |
     In-memory key-value store. Open-source fork of Redis, maintained by the
