@@ -20,19 +20,24 @@ WIP
 
 ## Connecting
 
-Not routed — reachable only from inside your organization's network, at
-`<app>.<app>.svc.cluster.local:6379`.
+Not routed — reachable only from inside your organization's network, at:
+
+```
+<app>.<app>.svc.cluster.local:6379
+```
+
+`<app>` is your app name.
 
 The password is in the app config as `VALKEY_PASSWORD`:
 
 ```sh
-runway app config ls --app my-cache
+runway app config ls --app <app>
 ```
 
 Connect as the default user with that password:
 
 ```
-redis://default:<VALKEY_PASSWORD>@my-cache.my-cache.svc.cluster.local:6379
+redis://default:<VALKEY_PASSWORD>@<app>.<app>.svc.cluster.local:6379
 ```
 
 ## Notes
