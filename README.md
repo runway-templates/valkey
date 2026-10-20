@@ -18,6 +18,13 @@ WIP
 | `maxmemory_policy` | `noeviction` | `noeviction` for a queue/datastore, `allkeys-lru` for a cache |
 | `appendfsync` | `everysec` | `always` loses nothing on a crash but is much slower |
 
+## Outputs
+
+For other services in the same stack, as
+`${{ services.<name>.outputs.<KEY> }}`:
+
+`DSN`, the internal address.
+
 ## Connecting
 
 Not routed — reachable only from inside your organization's network, at:
