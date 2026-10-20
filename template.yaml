@@ -4,7 +4,7 @@ kind: Template
 
 metadata:
   name: valkey
-  version: 0.1.1
+  version: 0.2.0
   displayName: Valkey
   description: |
     In-memory key-value store. Open-source fork of Redis, maintained by the
@@ -92,6 +92,9 @@ services:
     runAs:
       user: 999
       group: 1000
+
+    outputs:
+      DSN: "redis://default:${{ env.VALKEY_PASSWORD }}@${{ runway.internal_address }}"
 
     healthcheck:
       type: tcp
