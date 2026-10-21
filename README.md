@@ -20,10 +20,7 @@ WIP
 
 ## Outputs
 
-For other services in the same stack, as
-`${{ services.<name>.outputs.<KEY> }}`:
-
-`DSN`, the internal address.
+`DSN`
 
 ## Connecting
 
